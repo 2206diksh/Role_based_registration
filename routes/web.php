@@ -1,68 +1,60 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\LoginController;
-use App\Mail\ApprovalRequestMail;
-use App\Mail\NewLoginNotification;
-use App\Models\User;
 
-// ✅ Registration Routes
-Route::get('/signup', [LoginController::class, 'showRegister'])->name('signup');
-Route::post('/store', [LoginController::class, 'register'])->name('register.store');
+/*
+|--------------------------------------------------------------------------
+| Public Routes
+|--------------------------------------------------------------------------
+*/
 
-// ✅ Login Routes
+// 🔐 Login
 Route::get('/', [LoginController::class, 'showLogin'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 
-// ✅ Password Reset Routes (handled inside LoginController)
+// 📝 Registration
+Route::get('/signup', [LoginController::class, 'showRegister'])->name('signup');
+Route::post('/store', [LoginController::class, 'register'])->name('register.store');
+
+// 🔁 Password Reset
 Route::get('/forgot-password', [LoginController::class, 'showForgotForm'])->name('password.request');
 Route::post('/forgot-password', [LoginController::class, 'sendResetLink'])->name('password.email');
 Route::get('/reset-password/{token}', [LoginController::class, 'showResetForm'])->name('password.reset');
 Route::post('/reset-password', [LoginController::class, 'resetPassword'])->name('password.update');
 
-// ✅ Authenticated Routes
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes (Only for logged in users)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
 
-    // Admin Dashboard
+    // 🧑‍💼 Admin Dashboard
     Route::get('/admin/dashboard', [LoginController::class, 'adminDashboard'])->name('admin.dashboard');
 
-    // User Dashboard
+    // 👤 User Dashboard
     Route::get('/user/dashboard', [LoginController::class, 'userDashboard'])->name('user.dashboard');
 
-    // Admin Approves Users
+    // ✅ Admin: Approve Users
     Route::post('/admin/approve/{id}', [LoginController::class, 'approve'])->name('admin.approve');
 
-    // Optional: View admin blade directly (for testing only)
-    Route::get('/dashboard-admin', function () {
-        return view('dashboard-admin');
-    })->name('dashboard.admin.view');
-});
+    // 📋 Admin: User List
+    Route::get('/admin/users', [LoginController::class, 'listUsers'])->name('users.list');
 
-// ✅ Test Mail Routes
+    // 👁️ View User
+    Route::get('/admin/users/{id}/view', [LoginController::class, 'showUser'])->name('users.show');
 
-// Test sending approval request email to admin
-Route::get('/test-admin-mail', function () {
-    $user = User::where('role', 'user')->first();
-    if (!$user) return '❌ No user found to test approval email.';
+    // ✏️ Edit User
+    Route::get('/admin/users/{id}/edit', [LoginController::class, 'editUser'])->name('users.edit');
+    Route::post('/admin/users/{id}/update', [LoginController::class, 'updateUser'])->name('users.update');
 
-    try {
-        Mail::to('dikshethasriss@gmail.com')->send(new ApprovalRequestMail($user));
-        return '✅ Test approval email sent.';
-    } catch (\Exception $e) {
-        return '❌ Mail failed: ' . $e->getMessage();
-    }
-});
+    // ❌ Delete User
+    Route::get('/admin/users/{id}/delete', [LoginController::class, 'confirmDeleteUser'])->name('users.confirmDelete');
+    Route::delete('/admin/users/{id}', [LoginController::class, 'deleteUser'])->name('users.destroy');
 
-// Test sending login notification email to admin
-Route::get('/test-login-mail', function () {
-    $user = User::where('role', 'user')->first();
-    if (!$user) return '❌ No user found to test login notification.';
-
-    try {
-        Mail::to('dikshethasriss@gmail.com')->send(new NewLoginNotification($user));
-        return '✅ Test login notification sent.';
-    } catch (\Exception $e) {
-        return '❌ Mail failed: ' . $e->getMessage();
-    }
+    // Optional Placeholder Page
+    Route::get('/admin/user-management', function () {
+        return view('admin.user-management');
+    })->name('admin.user.management');
 });

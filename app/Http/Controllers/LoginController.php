@@ -51,7 +51,7 @@ class LoginController extends Controller
         $user->save();
 
         if ($user->role === 'user') {
-            $adminEmail = 'dikshethasriss@gmail.com'; // or use env('ADMIN_EMAIL')
+            $adminEmail = 'dikshethasriss@gmail.com';
             Mail::to($adminEmail)->send(new ApprovalRequestMail($user));
         }
 
@@ -71,7 +71,6 @@ class LoginController extends Controller
                 return back()->withErrors(['Your account is pending admin approval.']);
             }
 
-            // Notify admin about login
             Mail::to('dikshethasriss@gmail.com')->send(new NewLoginNotification($user));
 
             return $user->role === 'admin'
@@ -87,7 +86,14 @@ class LoginController extends Controller
     {
         $totalUsers = User::count();
         $pendingApprovals = User::where('is_approved', 0)->get();
+
         return view('dashboard-admin', compact('totalUsers', 'pendingApprovals'));
+    }
+
+    // User dashboard
+    public function userDashboard()
+    {
+        return view('dashboard');
     }
 
     // Approve user
@@ -107,13 +113,7 @@ class LoginController extends Controller
         return redirect()->route('admin.dashboard')->with('success', 'User approved and email sent!');
     }
 
-    // User dashboard
-    public function userDashboard()
-    {
-        return view('dashboard');
-    }
-
-    // Show forgot password form
+    // Forgot password form
     public function showForgotForm()
     {
         return view('forgot-password');
@@ -137,7 +137,7 @@ class LoginController extends Controller
         return view('auth.reset-password', ['token' => $token, 'email' => request('email')]);
     }
 
-    // Handle password reset submission
+    // Reset password handler
     public function resetPassword(Request $request)
     {
         $request->validate([
@@ -157,5 +157,66 @@ class LoginController extends Controller
         return $status === Password::PASSWORD_RESET
             ? redirect()->route('login')->with('success', 'Password reset successful! Please login.')
             : back()->withErrors(['email' => [__($status)]]);
+    }
+
+    // ✅ List all users with search & pagination
+    public function listUsers(Request $request)
+    {
+        $search = $request->input('search');
+
+        $users = User::query()
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->appends(['search' => $search]);
+
+        return view('list', compact('users', 'search'));
+    }
+
+    // ✅ Show a single user
+    public function showUser($id)
+    {
+        $user = User::findOrFail($id);
+        return view('show-user', compact('user'));
+    }
+
+    // ✅ Edit user form
+    public function editUser($id)
+    {
+        $user = User::findOrFail($id);
+        return view('edit-user', compact('user'));
+    }
+
+    // ✅ Update user
+    public function updateUser(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $user = User::findOrFail($id);
+        $user->name = $request->name;
+        $user->save();
+
+        return redirect()->route('users.list')->with('success', 'User updated successfully.');
+    }
+
+    // ✅ Show delete confirmation
+    public function confirmDeleteUser($id)
+    {
+        $user = User::findOrFail($id);
+        return view('delete-user', compact('user'));
+    }
+
+    // ✅ Delete user
+    public function deleteUser($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return redirect()->route('users.list')->with('success', 'User deleted successfully.');
     }
 }
