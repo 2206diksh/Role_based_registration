@@ -3,32 +3,32 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\UploadedFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password as PasswordRule;
-use App\Mail\NewLoginNotification;
 use App\Mail\ApprovalRequestMail;
 use App\Mail\ApprovalNotification;
 
 class LoginController extends Controller
 {
-    // Show login form
+    // ------------------ Authentication ------------------
+
     public function showLogin()
     {
         return view('login');
     }
 
-    // Show register form
     public function showRegister()
     {
         return view('register');
     }
 
-    // Handle user registration
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -58,7 +58,6 @@ class LoginController extends Controller
         return redirect()->route('login')->with('success', 'Registered successfully! Please login.');
     }
 
-    // Handle login
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
@@ -71,7 +70,7 @@ class LoginController extends Controller
                 return back()->withErrors(['Your account is pending admin approval.']);
             }
 
-            Mail::to('dikshethasriss@gmail.com')->send(new NewLoginNotification($user));
+            Mail::to('dikshethasriss@gmail.com')->send(new ApprovalRequestMail($user));
 
             return $user->role === 'admin'
                 ? redirect()->route('admin.dashboard')->with('message', 'You are logged in as admin!')
@@ -81,7 +80,8 @@ class LoginController extends Controller
         return back()->withErrors(['Invalid credentials.']);
     }
 
-    // Admin dashboard
+    // ------------------ Dashboard ------------------
+
     public function adminDashboard()
     {
         $totalUsers = User::count();
@@ -90,13 +90,13 @@ class LoginController extends Controller
         return view('dashboard-admin', compact('totalUsers', 'pendingApprovals'));
     }
 
-    // User dashboard
     public function userDashboard()
     {
         return view('dashboard');
     }
 
-    // Approve user
+    // ------------------ Approvals ------------------
+
     public function approve(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -113,13 +113,13 @@ class LoginController extends Controller
         return redirect()->route('admin.dashboard')->with('success', 'User approved and email sent!');
     }
 
-    // Forgot password form
+    // ------------------ Password Reset ------------------
+
     public function showForgotForm()
     {
         return view('forgot-password');
     }
 
-    // Send password reset link
     public function sendResetLink(Request $request)
     {
         $request->validate(['email' => 'required|email|exists:users,email']);
@@ -131,13 +131,14 @@ class LoginController extends Controller
             : back()->withErrors(['email' => __($status)]);
     }
 
-    // Show reset password form
     public function showResetForm($token)
     {
-        return view('auth.reset-password', ['token' => $token, 'email' => request('email')]);
+        return view('auth.reset-password', [
+            'token' => $token,
+            'email' => request('email')
+        ]);
     }
 
-    // Reset password handler
     public function resetPassword(Request $request)
     {
         $request->validate([
@@ -159,7 +160,8 @@ class LoginController extends Controller
             : back()->withErrors(['email' => [__($status)]]);
     }
 
-    // ✅ List all users with search & pagination
+    // ------------------ User Management ------------------
+
     public function listUsers(Request $request)
     {
         $search = $request->input('search');
@@ -176,21 +178,18 @@ class LoginController extends Controller
         return view('list', compact('users', 'search'));
     }
 
-    // ✅ Show a single user
     public function showUser($id)
     {
         $user = User::findOrFail($id);
         return view('show-user', compact('user'));
     }
 
-    // ✅ Edit user form
     public function editUser($id)
     {
         $user = User::findOrFail($id);
         return view('edit-user', compact('user'));
     }
 
-    // ✅ Update user
     public function updateUser(Request $request, $id)
     {
         $request->validate([
@@ -204,19 +203,77 @@ class LoginController extends Controller
         return redirect()->route('users.list')->with('success', 'User updated successfully.');
     }
 
-    // ✅ Show delete confirmation
     public function confirmDeleteUser($id)
     {
         $user = User::findOrFail($id);
         return view('delete-user', compact('user'));
     }
 
-    // ✅ Delete user
     public function deleteUser($id)
     {
         $user = User::findOrFail($id);
         $user->delete();
 
         return redirect()->route('users.list')->with('success', 'User deleted successfully.');
+    }
+
+    // ------------------ File Upload ------------------
+
+    public function showUploadForm()
+    {
+        return view('upload-form');
+    }
+
+    public function handleUpload(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|max:10240',
+        ]);
+
+        $uploadedFile = $request->file('file');
+        $path = $uploadedFile->store('uploads', 'public');
+
+        UploadedFile::create([
+            'original_name' => $uploadedFile->getClientOriginalName(),
+            'path' => $path,
+        ]);
+
+        return redirect()->route('admin.upload.list')->with('success', 'File uploaded and saved in database!');
+    }
+
+    public function uploadedFiles()
+    {
+        $files = UploadedFile::latest()->get();
+        return view('upload', compact('files'));
+    }
+
+    public function viewFile($id)
+    {
+        $file = UploadedFile::findOrFail($id);
+
+        if (!Storage::disk('public')->exists($file->path)) {
+            return redirect()->back()->withErrors(['File not found on server.']);
+        }
+
+        $filePath = storage_path('app/public/' . $file->path);
+        $mimeType = mime_content_type($filePath);
+
+        return response()->file($filePath, [
+            'Content-Type' => $mimeType,
+            'Content-Disposition' => 'inline; filename="' . $file->original_name . '"'
+        ]);
+    }
+
+    public function deleteFile($id)
+    {
+        $file = UploadedFile::findOrFail($id);
+
+        if (Storage::disk('public')->exists($file->path)) {
+            Storage::disk('public')->delete($file->path);
+        }
+
+        $file->delete();
+
+        return redirect()->route('admin.upload.list')->with('success', 'File deleted successfully.');
     }
 }

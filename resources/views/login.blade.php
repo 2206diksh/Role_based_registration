@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,10 +35,7 @@
                             @csrf
 
                             {{-- Optional username (not used for login validation unless added in controller) --}}
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Username</label>
-                                <input type="text" name="name" class="form-control" id="username">
-                            </div>
+                            
 
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email address</label>

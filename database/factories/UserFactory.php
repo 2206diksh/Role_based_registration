@@ -29,7 +29,7 @@ class UserFactory extends Factory
             // 'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'role' => fake()->randomElement(['admin', 'user']),
+            'role' => fake()->randomElement(['user']),
             'is_approved' => fake()->boolean(80), // 80% chance of being approved
         ];
     }

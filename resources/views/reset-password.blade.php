@@ -1,3 +1,4 @@
+@extends('layouts.admin')
 <!DOCTYPE html>
 <html>
 <head>

@@ -38,20 +38,25 @@
 </head>
 <body class="bg-light">
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <h5 class="text-center mb-4">Admin Menu</h5>
-        <a href="{{ route('admin.dashboard') }}">🏠 Dashboard</a>
+   <!-- Sidebar -->
+<div class="sidebar">
+    <h5 class="text-center mb-4">Admin Menu</h5>
 
-        <!-- Users submenu -->
-        <a data-bs-toggle="collapse" href="#userMenu" role="button" aria-expanded="false" aria-controls="userMenu">
-            👥 Users
-        </a>
-        <div class="collapse submenu" id="userMenu">
-            <a href="{{ route('users.list') }}">📋 User List</a>
-            <a href="#">⚙️ User Management</a> <!-- Replace '#' with actual route when ready -->
-        </div>
+    <a href="{{ route('admin.dashboard') }}">🏠 Dashboard</a>
+
+    <!-- Users submenu -->
+    <a data-bs-toggle="collapse" href="#userMenu" role="button" aria-expanded="false" aria-controls="userMenu">
+        👥 Users
+    </a>
+    <div class="collapse submenu" id="userMenu">
+        <a href="{{ route('users.list') }}">📋 User List</a>
+        <a href="#">⚙️ User Management</a> <!-- Replace '#' with actual route when ready -->
     </div>
+
+    <!-- Uploaded Files -->
+    <a href="{{ route('admin.upload.list') }}">📁 Uploaded Files</a>
+</div>
+
 
     <!-- Main Content -->
     <div class="content">
@@ -120,3 +125,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+@extends('layouts.admin')
+@section('content')
+    <!-- Page-specific content -->
+@endsection

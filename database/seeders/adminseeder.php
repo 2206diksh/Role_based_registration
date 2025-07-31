@@ -1,18 +1,25 @@
 <?php
 
+
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
-class DatabaseSeeder extends Seeder
+class AdminSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        $this->call([
-            Adminseeder::class, // Make sure the class name matches exactly
-        ]);
+        User::updateOrCreate(
+            ['email' => 'dikshethasriss@gmail.com'],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('admin123'), // 👈 You can change this password
+                'role' => 'admin',
+                'is_approved' => true,
+            ]
+        );
     }
 }

@@ -1,3 +1,4 @@
+@extends('layouts.admin')
 {{-- resources/views/delete-user.blade.php --}}
 <!DOCTYPE html>
 <html>

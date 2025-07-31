@@ -1,3 +1,4 @@
+@extends('layouts.admin')
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -47,10 +48,10 @@
                 <input type="password" name="password_confirmation" class="form-control" placeholder="Confirm Password" required>
             </div>
 
-            {{-- Role Dropdown --}}
+            {{-- 🔽 Role Selection --}}
             <div class="mb-3">
-                <select name="role" class="form-control" required>
-                    <option value="" disabled selected>Select Role</option>
+                <select name="role" class="form-select" required>
+                    <option value="">-- Select Role --</option>
                     <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>User</option>
                     <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                 </select>

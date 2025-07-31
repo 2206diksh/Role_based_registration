@@ -5,7 +5,7 @@ use App\Http\Controllers\LoginController;
 
 /*
 |--------------------------------------------------------------------------
-| Public Routes
+| Public Routes (Guest only)
 |--------------------------------------------------------------------------
 */
 
@@ -23,26 +23,30 @@ Route::post('/forgot-password', [LoginController::class, 'sendResetLink'])->name
 Route::get('/reset-password/{token}', [LoginController::class, 'showResetForm'])->name('password.reset');
 Route::post('/reset-password', [LoginController::class, 'resetPassword'])->name('password.update');
 
+
 /*
 |--------------------------------------------------------------------------
-| Authenticated Routes (Only for logged in users)
+| Authenticated Routes (Only for logged-in users)
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Routes
+    |--------------------------------------------------------------------------
+    */
+
     // 🧑‍💼 Admin Dashboard
     Route::get('/admin/dashboard', [LoginController::class, 'adminDashboard'])->name('admin.dashboard');
 
-    // 👤 User Dashboard
-    Route::get('/user/dashboard', [LoginController::class, 'userDashboard'])->name('user.dashboard');
-
-    // ✅ Admin: Approve Users
+    // ✅ Approve Users
     Route::post('/admin/approve/{id}', [LoginController::class, 'approve'])->name('admin.approve');
 
-    // 📋 Admin: User List
+    // 📋 User List
     Route::get('/admin/users', [LoginController::class, 'listUsers'])->name('users.list');
 
-    // 👁️ View User
+    // 👁️ View Single User
     Route::get('/admin/users/{id}/view', [LoginController::class, 'showUser'])->name('users.show');
 
     // ✏️ Edit User
@@ -53,8 +57,25 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/users/{id}/delete', [LoginController::class, 'confirmDeleteUser'])->name('users.confirmDelete');
     Route::delete('/admin/users/{id}', [LoginController::class, 'deleteUser'])->name('users.destroy');
 
-    // Optional Placeholder Page
+    // 📁 Uploaded Files
+    Route::get('/admin/uploads', [LoginController::class, 'uploadedFiles'])->name('admin.upload.list');
+    Route::get('/admin/uploads/new', [LoginController::class, 'showUploadForm'])->name('file.upload.form');
+    Route::post('/admin/uploads', [LoginController::class, 'handleUpload'])->name('file.upload.store');
+    Route::get('/admin/uploads/view/{id}', [LoginController::class, 'viewFile'])->name('admin.upload.view');
+    Route::delete('/admin/uploads/delete/{id}', [LoginController::class, 'deleteUploadedFile'])->name('admin.upload.delete');
+
+    // ⚙️ Optional Placeholder
     Route::get('/admin/user-management', function () {
         return view('admin.user-management');
     })->name('admin.user.management');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | User Routes
+    |--------------------------------------------------------------------------
+    */
+
+    // 👤 User Dashboard
+    Route::get('/user/dashboard', [LoginController::class, 'userDashboard'])->name('user.dashboard');
 });

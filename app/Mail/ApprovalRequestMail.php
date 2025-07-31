@@ -8,7 +8,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class NewLoginNotification extends Mailable
+class ApprovalRequestMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -32,7 +32,7 @@ class NewLoginNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'New User Login Alert',
+            subject: 'New User Registration - Approval Needed'
         );
     }
 
@@ -44,7 +44,7 @@ class NewLoginNotification extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'new-login', // ✅ Blade file should be located at resources/views/emails/new-login.blade.php
+            view: 'new-approval' // 📄 View should exist at: resources/views/emails/approval-request.blade.php
         );
     }
 
@@ -58,4 +58,3 @@ class NewLoginNotification extends Mailable
         return [];
     }
 }
-
