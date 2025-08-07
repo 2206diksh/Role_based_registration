@@ -38,25 +38,24 @@
 </head>
 <body class="bg-light">
 
-   <!-- Sidebar -->
-<div class="sidebar">
-    <h5 class="text-center mb-4">Admin Menu</h5>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h5 class="text-center mb-4">Admin Menu</h5>
 
-    <a href="{{ route('admin.dashboard') }}">🏠 Dashboard</a>
+        <a href="{{ route('admin.dashboard') }}">🏠 Dashboard</a>
 
-    <!-- Users submenu -->
-    <a data-bs-toggle="collapse" href="#userMenu" role="button" aria-expanded="false" aria-controls="userMenu">
-        👥 Users
-    </a>
-    <div class="collapse submenu" id="userMenu">
-        <a href="{{ route('users.list') }}">📋 User List</a>
-        <a href="#">⚙️ User Management</a> <!-- Replace '#' with actual route when ready -->
+        <!-- Users submenu -->
+        <a data-bs-toggle="collapse" href="#userMenu" role="button" aria-expanded="false" aria-controls="userMenu">
+            👥 Users
+        </a>
+        <div class="collapse submenu" id="userMenu">
+            <a href="{{ route('users.list') }}">📋 User List</a>
+            <a href="#">⚙️ User Management</a> <!-- Replace '#' with actual route when ready -->
+        </div>
+
+        <!-- Uploaded Files -->
+        <a href="{{ route('admin.upload.list') }}">📁 Uploaded Files</a>
     </div>
-
-    <!-- Uploaded Files -->
-    <a href="{{ route('admin.upload.list') }}">📁 Uploaded Files</a>
-</div>
-
 
     <!-- Main Content -->
     <div class="content">
@@ -70,6 +69,8 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <h4>Total Registered Users: {{ $totalUsers }}</h4>
+                    <h4>Active Users: {{ $activeUsersCount }}</h4>
+                    <h4>Inactive Users: {{ $inactiveUsersCount }}</h4>
                 </div>
             </div>
 
@@ -125,7 +126,3 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-@extends('layouts.admin')
-@section('content')
-    <!-- Page-specific content -->
-@endsection

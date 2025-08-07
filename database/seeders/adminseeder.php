@@ -16,7 +16,7 @@ class AdminSeeder extends Seeder
             ['email' => 'dikshethasriss@gmail.com'],
             [
                 'name' => 'Admin',
-                'password' => Hash::make('admin123'), // 👈 You can change this password
+                'password' => Hash::make('password'), // 👈 You can change this password
                 'role' => 'admin',
                 'is_approved' => true,
             ]

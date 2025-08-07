@@ -3,11 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 
-/*
-|--------------------------------------------------------------------------
-| Public Routes (Guest only)
-|--------------------------------------------------------------------------
-*/
+// --------------------------------------------------------------------------
+// Public Routes (Guest only)
+// --------------------------------------------------------------------------
 
 // 🔐 Login
 Route::get('/', [LoginController::class, 'showLogin'])->name('login');
@@ -24,18 +22,14 @@ Route::get('/reset-password/{token}', [LoginController::class, 'showResetForm'])
 Route::post('/reset-password', [LoginController::class, 'resetPassword'])->name('password.update');
 
 
-/*
-|--------------------------------------------------------------------------
-| Authenticated Routes (Only for logged-in users)
-|--------------------------------------------------------------------------
-*/
+// --------------------------------------------------------------------------
+// Authenticated Routes (Only for logged-in users)
+// --------------------------------------------------------------------------
 Route::middleware('auth')->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | Admin Routes
-    |--------------------------------------------------------------------------
-    */
+    // ----------------------------------------------------------------------
+    // Admin Routes
+    // ----------------------------------------------------------------------
 
     // 🧑‍💼 Admin Dashboard
     Route::get('/admin/dashboard', [LoginController::class, 'adminDashboard'])->name('admin.dashboard');
@@ -61,21 +55,25 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/uploads', [LoginController::class, 'uploadedFiles'])->name('admin.upload.list');
     Route::get('/admin/uploads/new', [LoginController::class, 'showUploadForm'])->name('file.upload.form');
     Route::post('/admin/uploads', [LoginController::class, 'handleUpload'])->name('file.upload.store');
+
+    // ✅ GET view for AJAX multiple upload
+    Route::get('/admin/uploads/ajax', [LoginController::class, 'showAjaxUploadForm'])->name('file.upload.ajax.form');
+
+    // ✅ POST for handling AJAX uploads
+    Route::post('/admin/uploads/multiple', [LoginController::class, 'handleMultipleUpload'])->name('file.upload.multiple');
+
+    // 🔍 View & Delete
     Route::get('/admin/uploads/view/{id}', [LoginController::class, 'viewFile'])->name('admin.upload.view');
     Route::delete('/admin/uploads/delete/{id}', [LoginController::class, 'deleteUploadedFile'])->name('admin.upload.delete');
 
-    // ⚙️ Optional Placeholder
+    // ⚙️ Placeholder
     Route::get('/admin/user-management', function () {
         return view('admin.user-management');
     })->name('admin.user.management');
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | User Routes
-    |--------------------------------------------------------------------------
-    */
-
     // 👤 User Dashboard
     Route::get('/user/dashboard', [LoginController::class, 'userDashboard'])->name('user.dashboard');
+
+    // ✅ ✅ ✅ MISSING ROUTE FIX (added here)
+    Route::get('/upload/files', [LoginController::class, 'uploadedFiles'])->name('upload.files');
 });

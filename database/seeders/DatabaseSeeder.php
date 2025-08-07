@@ -1,8 +1,9 @@
 <?php
 
 namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
-use App\models\User;
+use App\Models\User;
 
 class DatabaseSeeder extends Seeder
 {
@@ -11,11 +12,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            AdminSeeder::class,
+        // Create 10 approved users
+        User::factory()->count(10)->create([
+            'is_approved' => true,
         ]);
-       
-    // Generate 30 random users
-    User::factory()->count(30)->create();
+
+        // Create 20 unapproved users
+        User::factory()->count(20)->unapproved()->create();
     }
 }
